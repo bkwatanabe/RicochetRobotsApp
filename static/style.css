@@ -1,0 +1,60 @@
+.board {
+    margin: auto;
+    display: inline-block;
+}
+div.cell {
+    border: 1px solid #dcdcdc;
+    /*border-color: grey;
+    border-style: solid;
+    border-left-width: 1px;
+    border-right-width: 1px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;*/
+    height: 20px !important;
+    width: 20px;
+    float: left;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;         /* Opera/IE 8+ */
+}
+div.row {
+    clear: both;
+}
+div.top {
+    border-top: 3px solid black;
+}
+div.right {
+    border-right: 3px solid black;
+}
+div.bottom {
+    border-bottom: 3px solid black;
+}
+div.left {
+    border-left: 3px solid black;
+}
+
+#colors {
+    display: inline-block;
+}
+#colors .color {
+    padding: 10px;
+}
+#colors .highlighted {
+    box-shadow: 0 0 2pt 2pt cornflowerblue;
+}
+
+div.red {
+    background-color: red;
+}
+div.blue {
+    background-color: blue;
+}
+div.yellow {
+    background-color: yellow;
+}
+div.green {
+    background-color: green;
+}
+div.silver {
+    background-color: silver;
+}
