@@ -2,6 +2,7 @@ from flask import Flask, request, session, g, redirect, url_for, abort, render_t
 from board import *
 from flask_socketio import SocketIO, send, emit
 import json
+from game import Game
 
 
 app = Flask(__name__)
@@ -12,6 +13,9 @@ if __name__ == '__main__':
     socketio.run(app)
 
 
+
+# Somehow need to know what board to connect to.
+# Swap out all test_board stuff
 @socketio.on('connect')
 def get_board():
     # robot = test_board.robots[Color.Red]
@@ -48,3 +52,18 @@ def move_robot(color, direction):
 @app.route("/")
 def hello():
     return render_template('index.html')
+
+@app.route("/game", methods=['GET','POST'])
+def game():
+    if request.method == 'GET':
+        raise NotImplementedError() # show all games
+    else:
+        # create new game and a new room using game id as the room name
+        game = Game()
+        # print(url_for(get_game, game_id=game.id))
+        return game.id
+
+@app.route("/game/<game_id>")
+def get_game(game_id):
+    return render_template('game.html')
+

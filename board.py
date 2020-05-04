@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, shuffle
 from enum import Enum
 import json
 from bisect import *
@@ -87,10 +87,6 @@ class Destination:
 
 class Robot:
     def __init__(self, x_coord, y_coord, color: Color):
-        # self.init_x_coord = x_coord
-        # self.init_y_coord = y_coord
-        # self.current_coords[0] = x_coord
-        # self.current_coords[1] = y_coord
         self.init_coords = x_coord, y_coord
         self.current_coords = x_coord, y_coord
         self.color = color
@@ -99,8 +95,6 @@ class Robot:
         return "color: " + self.color.name + ", x: " + str(self.current_coords[0]) + ", y: " + str(self.current_coords[1])
 
     def update_current(self, new_x, new_y):
-        # self.current_coords[0] = new_x
-        # self.current_coords[1] = new_y
         self.current_coords = new_x, new_y
 
     def update_init(self):
@@ -228,18 +222,9 @@ class Board:
         self.x_walls = self.__merge_walls(self.q1.x_walls, self.q2.x_walls, self.q3.x_walls, self.q4.x_walls)
         self.y_walls = self.__merge_walls(self.q1.y_walls, self.q2.y_walls, self.q3.y_walls, self.q4.y_walls)
         self.destinations = self.q1.destinations + self.q2.destinations + self.q3.destinations + self.q4.destinations
-        # Should probably make robots a dictionary where color is the key
-        # Currently using single robot for testing
-        # self.robots = {Color.Red: Robot(0, 0, Color.Red)}
         self.robots = self.place_all_robots()
 
-    def get_json(self):
-        data = {}
-        data['x_walls'] = self.x_walls
-        data['y_walls'] = self.y_walls
-        data['destinations'] = [destination.get_dict() for destination in self.destinations]
-        return json.dumps(data)
-
+    # might be able to use get_json as implementation for this. May want to add robots to get_json.
     def __repr__(self):
         return '{' + \
                     '"x_walls":' + str(self.x_walls) + ',' + \
@@ -247,24 +232,6 @@ class Board:
                     '"destinations":' + str(self.destinations) + ',' + \
                     '"robots":' + str(self.robots) + \
                '}'
-
-    def move_robot(self, color: Color, direction: Direction):
-        # robot = self.robots[color]
-        # start = robot.current_coords[0], robot.current_coords[1]
-        if direction == Direction.Up:
-            self.__move_robot_up(color)
-        elif direction == Direction.Right:
-            self.__move_robot_right(color)
-        elif direction == Direction.Down:
-            self.__move_robot_down(color)
-        else:
-            self.__move_robot_left(color)
-        # current = robot.current_coords[0], robot.current_coords[1]
-        # print(f"{color.name} robot has been moved from {start} to {current}.")
-
-    # def get_all_robot_coords(self):
-    #     coords = []
-    #     for robot in self.robots:
 
 
     def place_all_robots(self):
@@ -281,33 +248,24 @@ class Board:
 
         return robots
 
-    # implement bumping into other robots.
-    def __get_other_robots_plus_x_walls(self, color: Color):
-        robots = []
-        for i in range(1, 6):
-            if color != Color(i) and self.robots[color].current_coords[0] == self.robots[Color(i)].current_coords[0]:
-                robots.append(self.robots[Color(i)].current_coords[1] - 1)
-                robots.append(self.robots[Color(i)].current_coords[1])
-        
-        x_walls = []
-        if self.x_walls.get(self.robots[color].current_coords[0]) != None:
-            x_walls = self.x_walls.get(self.robots[color].current_coords[0])
+    def get_json(self):
+        data = {}
+        data['x_walls'] = self.x_walls
+        data['y_walls'] = self.y_walls
+        data['destinations'] = [destination.get_dict() for destination in self.destinations]
+        return json.dumps(data)
 
-        return sorted(robots + x_walls)
-
-    def __get_other_robots_plus_y_walls(self, color: Color):
-        robots = []
-        for i in range(1, 6):
-            if color != Color(i) and self.robots[color].current_coords[1] == self.robots[Color(i)].current_coords[1]:
-                robots.append(self.robots[Color(i)].current_coords[0] - 1)
-                robots.append(self.robots[Color(i)].current_coords[0])
-
-        y_walls = []
-        if self.y_walls.get(self.robots[color].current_coords[1]) != None:
-            y_walls = self.y_walls.get(self.robots[color].current_coords[1])
-
-        return sorted(robots + y_walls)
-
+    def move_robot(self, color: Color, direction: Direction):
+        # robot = self.robots[color]
+        # start = robot.current_coords[0], robot.current_coords[1]
+        if direction == Direction.Up:
+            self.__move_robot_up(color)
+        elif direction == Direction.Right:
+            self.__move_robot_right(color)
+        elif direction == Direction.Down:
+            self.__move_robot_down(color)
+        else:
+            self.__move_robot_left(color)
 
     def __move_robot_up(self, color: Color):
         x_walls = self.__get_other_robots_plus_x_walls(color)
@@ -340,6 +298,34 @@ class Board:
         except KeyError:
             end_x = 0
         self.robots[color].update_current(end_x, self.robots[color].current_coords[1])
+
+
+    # implement bumping into other robots.
+    def __get_other_robots_plus_x_walls(self, color: Color):
+        robots = []
+        for i in range(1, 6):
+            if color != Color(i) and self.robots[color].current_coords[0] == self.robots[Color(i)].current_coords[0]:
+                robots.append(self.robots[Color(i)].current_coords[1] - 1)
+                robots.append(self.robots[Color(i)].current_coords[1])
+        
+        x_walls = []
+        if self.x_walls.get(self.robots[color].current_coords[0]) != None:
+            x_walls = self.x_walls.get(self.robots[color].current_coords[0])
+
+        return sorted(robots + x_walls)
+
+    def __get_other_robots_plus_y_walls(self, color: Color):
+        robots = []
+        for i in range(1, 6):
+            if color != Color(i) and self.robots[color].current_coords[1] == self.robots[Color(i)].current_coords[1]:
+                robots.append(self.robots[Color(i)].current_coords[0] - 1)
+                robots.append(self.robots[Color(i)].current_coords[0])
+
+        y_walls = []
+        if self.y_walls.get(self.robots[color].current_coords[1]) != None:
+            y_walls = self.y_walls.get(self.robots[color].current_coords[1])
+
+        return sorted(robots + y_walls)
 
 
     @staticmethod
@@ -475,4 +461,17 @@ qboard_side_4a = QuarterBoardSide("4a", qboard4a_x_walls, qboard4a_y_walls, qboa
 qboard_side_4b = QuarterBoardSide("4b", qboard4b_x_walls, qboard4b_y_walls, qboard_4b_destinations)
 qboard_4 = QuarterBoard("board_4", qboard_side_4a, qboard_side_4b)
 
-test_board = Board(qboard_side_1a, qboard_side_2a, qboard_side_3a, qboard_side_4a)
+# test_board = Board(qboard_side_1a, qboard_side_2a, qboard_side_3a, qboard_side_4a)
+
+# Creates random boards based off of the 4 predefined quarter boards.
+def board_factory() -> Board:
+    qboards = [qboard_1, qboard_2, qboard_3, qboard_4]
+    # print(qboards)
+    shuffle(qboards)
+    # print("shuffled: ", qboards)
+    qboard_sides = []
+    for qboard in qboards:
+        qboard_sides.append(qboard.random_side())
+    return Board(*qboard_sides)
+
+test_board = board_factory()
