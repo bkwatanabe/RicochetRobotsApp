@@ -20,7 +20,11 @@ $(".color").click(function(event){
 });
 
 
-var socket = io();
+var socket = io({
+    query: {
+        game_id: game_id
+    }
+});
 
 socket.on('set board', (boardData, robotData) => {
     board = JSON.parse(boardData);
@@ -52,25 +56,25 @@ body.keydown(function(event) {
         //left
         case 37:
             //if(x>0) {--x;}
-            socket.emit("move robot", selected_color, "left");
+            socket.emit("move robot", selected_color, "left", game_id);
             break;
         //up
         case 38:
             //if(y<15) {++y;}
             //websocket
-            socket.emit("move robot", selected_color, "up");
+            socket.emit("move robot", selected_color, "up", game_id);
             break;
         //right
         case 39:
             //if(x<15) {++x;}
             //websocket
-            socket.emit("move robot", selected_color, "right");
+            socket.emit("move robot", selected_color, "right", game_id);
             break;
         //down
         case 40:
             //if(y>0) {--y;}
             //websocket
-            socket.emit("move robot", selected_color, "down");
+            socket.emit("move robot", selected_color, "down", game_id);
     }
 });
 
